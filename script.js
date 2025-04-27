@@ -253,30 +253,17 @@ function createCharacterBody() {
     );
     
     Matter.World.add(world, characterBody);
-    console.log("Character body created:", characterBody);
 }
 
 // 处理碰撞事件
 function handleCollision(event) {
-    // 打印所有碰撞对
-    console.log("Collision detected:", event.pairs.length, "pairs");
-    
     event.pairs.forEach((pair) => {
         const bodyA = pair.bodyA;
         const bodyB = pair.bodyB;
         
-        console.log("Collision between:", 
-            bodyA === characterBody ? "character" : "other", 
-            bodyB === characterBody ? "character" : "other",
-            bodyA === swordBody ? "sword" : "other",
-            bodyB === swordBody ? "sword" : "other"
-        );
-        
         // 检查是否是角色与宝剑的碰撞
         if ((bodyA === characterBody && bodyB === swordBody) ||
             (bodyB === characterBody && bodyA === swordBody)) {
-            
-            console.log("Character-Sword collision detected!");
             
             // 获取角色的速度和位置
             const charBody = bodyA === characterBody ? bodyA : bodyB;
@@ -284,24 +271,14 @@ function handleCollision(event) {
             const charPosition = charBody.position;
             const swordPosition = swordBody.position;
             
-            console.log("Character velocity:", charVelocity);
-            console.log("Character position:", charPosition);
-            console.log("Sword position:", swordPosition);
-            
             // 计算角色相对于宝剑的位置向量
             const relativePos = {
                 x: charPosition.x - swordPosition.x,
                 y: charPosition.y - swordPosition.y
             };
             
-            console.log("Relative position:", relativePos);
-            
             // 检查角色是否从左下方向碰撞宝剑
-            // 放宽条件，只要相对位置大致在左下区域就可以
-            //const isPushingFromBottomLeft = relativePos.x < 0 && relativePos.y > 0;
             const isPushingFromBottomLeft = true; // 暂时忽略方向检查，测试是否能移动
-            
-            console.log("Pushing from bottom left:", isPushingFromBottomLeft);
             
             if (isPushingFromBottomLeft) {
                 // 计算碰撞力度 (基于角色速度的绝对值)
@@ -312,8 +289,6 @@ function handleCollision(event) {
                 
                 // 确保有最小的移动量
                 const actualForce = Math.max(forceMagnitude, 0.5);
-                
-                console.log("Force magnitude:", forceMagnitude, "Actual force:", actualForce);
                 
                 // 计算宝剑沿右上45度方向的新位置
                 const newSwordPosition = {
@@ -329,16 +304,11 @@ function handleCollision(event) {
                 const leftBottomDir = { x: -1, y: 1 };
                 const projection = offsetX * leftBottomDir.x + offsetY * leftBottomDir.y;
                 
-                console.log("Offset:", offsetX, offsetY, "Projection:", projection);
-                
                 // 如果投影为负或零，说明宝剑没有超过初始位置的左下方，可以移动
                 if (projection <= 0) {
                     Matter.Body.setPosition(swordBody, newSwordPosition);
                     // 更新宝剑最后一次移动的时间
                     lastSwordMoveTime = Date.now();
-                    console.log(`Sword moved! New position: (${newSwordPosition.x.toFixed(2)}, ${newSwordPosition.y.toFixed(2)})`);
-                } else {
-                    console.log("Sword can't move: would go beyond initial position");
                 }
             }
         }
@@ -694,12 +664,6 @@ function updatePhysics() {
             x: physics.velocity.x,
             y: physics.velocity.y
         });
-        
-        // 打印物理碰撞体位置，确认与角色同步
-        if (isThirdGame && Math.random() < 0.01) { // 只记录1%的更新以避免日志过多
-            console.log("Character physics body position:", characterBody.position);
-            console.log("Character DOM position:", physics.position);
-        }
     }
 
     // 根据移动方向翻转角色
@@ -766,8 +730,6 @@ function showWinMessage() {
 
 // 开始第二个游戏的函数
 function startSecondGame() {
-    console.log("Starting second game...");
-
     // 隐藏胜利信息
     winMessage.classList.add('hidden');
 
@@ -814,6 +776,11 @@ function updateScore(newScore) {
     if (isSecondGame && score >= 200 && !gameOver) {
         showSecondLevelWin();
     }
+    
+    // 第三关过关条件 (例如，达到500分)
+    if (isThirdGame && score >= 500 && !gameOver) {
+        showThirdLevelWin();
+    }
 }
 
 // 第二关胜利
@@ -849,8 +816,6 @@ function showSecondLevelWin() {
 
 // 开始第三关
 function startThirdGame() {
-    console.log("Starting third game...");
-
     // 隐藏胜利信息
     winMessage.classList.add('hidden');
 
@@ -897,46 +862,6 @@ function startThirdGame() {
         x: physics.position.x + 60, // 调整偏移量
         y: physics.position.y + 60  // 调整偏移量
     });
-    
-    console.log("Character position initialized:", physics.position);
-    console.log("Character body position initialized:", characterBody.position);
-}
-
-// 更新分数显示
-function updateScore(newScore) {
-    score = Math.max(0, newScore); // 确保分数不小于0
-    document.getElementById('score').textContent = Math.floor(score);
-    
-    // 检查是否达到过关分数
-    if (isSecondGame && score >= 2 && !gameOver) {
-        showSecondLevelWin();
-    }
-    
-    // 第三关过关条件 (例如，达到500分)
-    if (isThirdGame && score >= 500 && !gameOver) {
-        showThirdLevelWin();
-    }
-}
-
-// 第三关胜利
-function showThirdLevelWin() {
-    gameOver = true;
-    
-    // 显示胜利信息
-    winMessage.classList.remove('hidden');
-    winMessage.querySelector('h2').textContent = '恭喜！你成功完成了所有关卡！';
-    
-    // 播放胜利音效
-    if (sounds.win) {
-        sounds.win.currentTime = 0;
-        sounds.win.play();
-    }
-    
-    // 停止背景音乐
-    if (sounds.background && !sounds.background.paused) {
-        sounds.background.pause();
-        sounds.background.currentTime = 0;
-    }
 }
 
 // 初始化第三关的物理引擎
@@ -992,7 +917,6 @@ function initThirdLevelPhysics() {
         }
     );
     Matter.World.add(world, swordBody);
-    console.log("Sword body created:", swordBody);
     
     // 保存宝剑的初始位置
     swordInitialPosition = { x: initialX, y: initialY };
@@ -1003,12 +927,10 @@ function initThirdLevelPhysics() {
     // 添加碰撞事件监听
     Matter.Events.on(engine, 'collisionStart', handleCollision);
     Matter.Events.on(engine, 'collisionActive', handleCollision);
-    console.log("Collision event listeners added");
 
     // 运行引擎和渲染器
     Matter.Runner.run(engine);
     Matter.Render.run(render);
-    console.log("Physics engine running");
 }
 
 // 启动分数计算
@@ -1157,13 +1079,6 @@ function gameLoop() {
                     x: physics.position.x + 60, // 调整偏移量
                     y: physics.position.y + 60  // 调整偏移量
                 });
-                
-                if (Math.random() < 0.01) { // 只记录1%的更新以避免日志过多
-                    console.log("gameLoop: Character body at", characterBody.position);
-                    console.log("gameLoop: Character at", physics.position);
-                }
-            } else {
-                console.warn("gameLoop: characterBody is null in third game!");
             }
             
             // 添加宝剑的重力效果
@@ -1197,15 +1112,9 @@ function gameLoop() {
                             y: swordInitialPosition.y
                         };
                         Matter.Body.setPosition(swordBody, newPosition);
-                        if (Math.random() < 0.1) { // 减少日志频率
-                            console.log("Sword reset to initial position");
-                        }
                     } else {
                         // 应用重力效果
                         Matter.Body.setPosition(swordBody, newSwordPosition);
-                        if (Math.random() < 0.1) { // 减少日志频率
-                            console.log("Applying gravity to sword");
-                        }
                     }
                 }
                 
@@ -1226,11 +1135,6 @@ function gameLoop() {
                     
                     // 更新分数显示
                     updateScore(distanceScore);
-                    
-                    // 如果是记录分数的帧，输出日志
-                    if (Math.random() < 0.01) {
-                        console.log("Distance score:", distanceScore);
-                    }
                 }
             }
         }
@@ -1249,3 +1153,24 @@ gameLoop();
 window.addEventListener('load', () => {
     preloadResources();
 }); 
+
+// 第三关胜利
+function showThirdLevelWin() {
+    gameOver = true;
+    
+    // 显示胜利信息
+    winMessage.classList.remove('hidden');
+    winMessage.querySelector('h2').textContent = '恭喜！你成功完成了所有关卡！';
+    
+    // 播放胜利音效
+    if (sounds.win) {
+        sounds.win.currentTime = 0;
+        sounds.win.play();
+    }
+    
+    // 停止背景音乐
+    if (sounds.background && !sounds.background.paused) {
+        sounds.background.pause();
+        sounds.background.currentTime = 0;
+    }
+} 
