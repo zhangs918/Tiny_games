@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>闯关小游戏</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:,">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+</head>
+<body>
+    <div class="game-container">
+        <div class="start-screen">
+            <h1>闯关小游戏</h1>
+            <div class="loading-container">
+                <div class="loading-bar">
+                    <div class="loading-progress"></div>
+                </div>
+                <div class="loading-text">加载中... <span class="loading-percentage">0%</span></div>
+            </div>
+            <button class="start-button hidden">开始游戏</button>
+            <p class="start-text hidden">按任意键开始游戏</p>
+        </div>
+        <div class="game-area hidden">
+            <canvas id="physics-canvas"></canvas>
+            <div class="score-display hidden">
+                <span>分数：</span>
+                <span id="score">0</span>
+            </div>
+            <div class="background-person-container">
+                <img src="back_person.png" alt="背景人物" class="background-image">
+                <div class="marker left-armpit">
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                </div>
+                <div class="marker right-armpit">
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                    <div class="hair-strand"></div>
+                </div>
+            </div>
+            <div class="ground"></div>
+            <div class="character">
+                <img src="stand.gif" alt="游戏角色" id="character-sprite">
+            </div>
+            <div class="win-message hidden">
+                <h2>游戏过关！</h2>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 

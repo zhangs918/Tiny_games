@@ -1,0 +1,613 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f0f0;
+}
+
+.game-container {
+    width: 100%;
+    height: 100%;
+}
+
+.hidden {
+    display: none;
+}
+
+.start-screen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #333;
+    z-index: 10;
+}
+
+.start-screen h1 {
+    font-size: 3em;
+    margin-bottom: 20px;
+    color: #2c3e50;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.start-screen p {
+    font-size: 1.5em;
+    color: #7f8c8d;
+    animation: blink 1.5s infinite;
+}
+
+.game-area {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    background-image: url('back.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+}
+
+/* Container for the centered person image and markers */
+.background-person-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px;
+    height: auto;
+    z-index: 1; /* Above game-area background */
+    opacity: 1; /* Restore opacity */
+}
+
+/* The centered person image */
+.background-image {
+    display: block; /* Make visible again */
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Markers (Hair clusters) */
+.marker {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    z-index: 2;
+    cursor: default;
+    user-select: none;
+    transform: translate(-50%, -50%);
+    animation: armpitFloat 1.5s ease-in-out infinite;
+    transform-origin: center;
+}
+
+@keyframes armpitFloat {
+    0% {
+        transform: translate(-50%, -50%) rotate(-15deg);
+    }
+    25% {
+        transform: translate(-50%, -50%) rotate(15deg);
+    }
+    50% {
+        transform: translate(-50%, -50%) rotate(-20deg);
+    }
+    75% {
+        transform: translate(-50%, -50%) rotate(20deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(-15deg);
+    }
+}
+
+.left-armpit {
+    top: 35%;
+    left: 26%;
+}
+
+.right-armpit {
+    top: 36%;
+    left: 65%;
+}
+
+/* 基础腋毛样式 */
+.hair-strand {
+    position: absolute;
+    display: block;
+    width: 1px;
+    height: 20px;
+    background-color: black;
+    top: 50%; 
+    left: 50%;
+    transform-origin: center top;
+    border-radius: 1px;
+}
+
+.hair-strand::after {
+    content: "";
+    position: absolute;
+    display: block;
+    width: 1px;
+    height: 20px;
+    background-color: black;
+    border-radius: 1px;
+    bottom: -1px;
+    left: 50%;
+    transform-origin: center top;
+    transform: translateX(-50%) rotate(180deg); /* 基础夹角调整为180度 */
+}
+
+/* 左边腋毛，朝下，适当散开 */
+.left-armpit .hair-strand:nth-child(1) {
+    transform: translateX(-8px) translateY(-5px) rotate(235deg);
+    height: 22px;
+}
+.left-armpit .hair-strand:nth-child(1)::after {
+    transform: translateX(-50%) rotate(225deg);
+    height: 21px;
+}
+
+.left-armpit .hair-strand:nth-child(2) {
+    transform: translateX(6px) translateY(-3px) rotate(165deg);
+    height: 20px;
+}
+.left-armpit .hair-strand:nth-child(2)::after {
+    transform: translateX(-50%) rotate(145deg);
+    height: 19px;
+}
+
+.left-armpit .hair-strand:nth-child(3) {
+    transform: translateX(-4px) translateY(0px) rotate(205deg);
+    height: 21px;
+}
+.left-armpit .hair-strand:nth-child(3)::after {
+    transform: translateX(-50%) rotate(190deg);
+    height: 20px;
+}
+
+.left-armpit .hair-strand:nth-child(4) {
+    transform: translateX(8px) translateY(3px) rotate(155deg);
+    height: 19px;
+}
+.left-armpit .hair-strand:nth-child(4)::after {
+    transform: translateX(-50%) rotate(135deg);
+    height: 18px;
+}
+
+.left-armpit .hair-strand:nth-child(5) {
+    transform: translateX(-2px) translateY(5px) rotate(195deg);
+    height: 20px;
+}
+.left-armpit .hair-strand:nth-child(5)::after {
+    transform: translateX(-50%) rotate(180deg);
+    height: 22px;
+}
+
+.left-armpit .hair-strand:nth-child(6) {
+    transform: translateX(4px) translateY(-4px) rotate(245deg);
+    height: 21px;
+}
+.left-armpit .hair-strand:nth-child(6)::after {
+    transform: translateX(-50%) rotate(215deg);
+    height: 20px;
+}
+
+.left-armpit .hair-strand:nth-child(7) {
+    transform: translateX(-6px) translateY(2px) rotate(175deg);
+    height: 19px;
+}
+.left-armpit .hair-strand:nth-child(7)::after {
+    transform: translateX(-50%) rotate(155deg);
+    height: 21px;
+}
+
+.left-armpit .hair-strand:nth-child(8) {
+    transform: translateX(7px) translateY(4px) rotate(225deg);
+    height: 20px;
+}
+.left-armpit .hair-strand:nth-child(8)::after {
+    transform: translateX(-50%) rotate(195deg);
+    height: 19px;
+}
+
+.left-armpit .hair-strand:nth-child(9) {
+    transform: translateX(-7px) translateY(-2px) rotate(185deg);
+    height: 22px;
+}
+.left-armpit .hair-strand:nth-child(9)::after {
+    transform: translateX(-50%) rotate(165deg);
+    height: 20px;
+}
+
+.left-armpit .hair-strand:nth-child(10) {
+    transform: translateX(5px) translateY(5px) rotate(215deg);
+    height: 21px;
+}
+.left-armpit .hair-strand:nth-child(10)::after {
+    transform: translateX(-50%) rotate(185deg);
+    height: 22px;
+}
+
+/* 左边腋毛，朝下，适当散开 */
+.left-armpit .hair-strand:nth-child(11) {
+    transform: translateX(-3px) translateY(-1px) rotate(225deg);
+    height: 20px;
+}
+.left-armpit .hair-strand:nth-child(11)::after {
+    transform: translateX(-50%) rotate(195deg);
+    height: 19px;
+}
+
+.left-armpit .hair-strand:nth-child(12) {
+    transform: translateX(1px) translateY(-4px) rotate(185deg);
+    height: 21px;
+}
+.left-armpit .hair-strand:nth-child(12)::after {
+    transform: translateX(-50%) rotate(165deg);
+    height: 20px;
+}
+
+.left-armpit .hair-strand:nth-child(13) {
+    transform: translateX(-5px) translateY(1px) rotate(215deg);
+    height: 19px;
+}
+.left-armpit .hair-strand:nth-child(13)::after {
+    transform: translateX(-50%) rotate(185deg);
+    height: 18px;
+}
+
+.left-armpit .hair-strand:nth-child(14) {
+    transform: translateX(3px) translateY(2px) rotate(175deg);
+    height: 22px;
+}
+.left-armpit .hair-strand:nth-child(14)::after {
+    transform: translateX(-50%) rotate(155deg);
+    height: 21px;
+}
+
+.left-armpit .hair-strand:nth-child(15) {
+    transform: translateX(-7px) translateY(-3px) rotate(205deg);
+    height: 20px;
+}
+.left-armpit .hair-strand:nth-child(15)::after {
+    transform: translateX(-50%) rotate(175deg);
+    height: 19px;
+}
+
+.left-armpit .hair-strand:nth-child(16) {
+    transform: translateX(5px) translateY(4px) rotate(235deg);
+    height: 21px;
+}
+.left-armpit .hair-strand:nth-child(16)::after {
+    transform: translateX(-50%) rotate(205deg);
+    height: 20px;
+}
+
+.left-armpit .hair-strand:nth-child(17) {
+    transform: translateX(-1px) translateY(-2px) rotate(195deg);
+    height: 19px;
+}
+.left-armpit .hair-strand:nth-child(17)::after {
+    transform: translateX(-50%) rotate(165deg);
+    height: 18px;
+}
+
+.left-armpit .hair-strand:nth-child(18) {
+    transform: translateX(7px) translateY(1px) rotate(225deg);
+    height: 20px;
+}
+.left-armpit .hair-strand:nth-child(18)::after {
+    transform: translateX(-50%) rotate(195deg);
+    height: 19px;
+}
+
+.left-armpit .hair-strand:nth-child(19) {
+    transform: translateX(-4px) translateY(3px) rotate(185deg);
+    height: 21px;
+}
+.left-armpit .hair-strand:nth-child(19)::after {
+    transform: translateX(-50%) rotate(155deg);
+    height: 20px;
+}
+
+.left-armpit .hair-strand:nth-child(20) {
+    transform: translateX(2px) translateY(-1px) rotate(215deg);
+    height: 19px;
+}
+.left-armpit .hair-strand:nth-child(20)::after {
+    transform: translateX(-50%) rotate(185deg);
+    height: 18px;
+}
+
+/* 右边腋毛，朝下，适当散开 */
+.right-armpit .hair-strand:nth-child(1) {
+    transform: translateX(8px) translateY(-5px) rotate(125deg);
+    height: 21px;
+}
+.right-armpit .hair-strand:nth-child(1)::after {
+    transform: translateX(-50%) rotate(-135deg);
+    height: 20px;
+}
+
+.right-armpit .hair-strand:nth-child(2) {
+    transform: translateX(-6px) translateY(-3px) rotate(195deg);
+    height: 19px;
+}
+.right-armpit .hair-strand:nth-child(2)::after {
+    transform: translateX(-50%) rotate(-225deg);
+    height: 18px;
+}
+
+.right-armpit .hair-strand:nth-child(3) {
+    transform: translateX(4px) translateY(0px) rotate(145deg);
+    height: 22px;
+}
+.right-armpit .hair-strand:nth-child(3)::after {
+    transform: translateX(-50%) rotate(-175deg);
+    height: 21px;
+}
+
+.right-armpit .hair-strand:nth-child(4) {
+    transform: translateX(-8px) translateY(3px) rotate(175deg);
+    height: 20px;
+}
+.right-armpit .hair-strand:nth-child(4)::after {
+    transform: translateX(-50%) rotate(-155deg);
+    height: 19px;
+}
+
+.right-armpit .hair-strand:nth-child(5) {
+    transform: translateX(2px) translateY(5px) rotate(135deg);
+    height: 18px;
+}
+.right-armpit .hair-strand:nth-child(5)::after {
+    transform: translateX(-50%) rotate(-205deg);
+    height: 20px;
+}
+
+.right-armpit .hair-strand:nth-child(6) {
+    transform: translateX(-4px) translateY(-4px) rotate(115deg);
+    height: 21px;
+}
+.right-armpit .hair-strand:nth-child(6)::after {
+    transform: translateX(-50%) rotate(-145deg);
+    height: 20px;
+}
+
+.right-armpit .hair-strand:nth-child(7) {
+    transform: translateX(6px) translateY(2px) rotate(185deg);
+    height: 19px;
+}
+.right-armpit .hair-strand:nth-child(7)::after {
+    transform: translateX(-50%) rotate(-215deg);
+    height: 21px;
+}
+
+.right-armpit .hair-strand:nth-child(8) {
+    transform: translateX(-7px) translateY(4px) rotate(135deg);
+    height: 20px;
+}
+.right-armpit .hair-strand:nth-child(8)::after {
+    transform: translateX(-50%) rotate(-165deg);
+    height: 19px;
+}
+
+.right-armpit .hair-strand:nth-child(9) {
+    transform: translateX(7px) translateY(-2px) rotate(175deg);
+    height: 22px;
+}
+.right-armpit .hair-strand:nth-child(9)::after {
+    transform: translateX(-50%) rotate(-195deg);
+    height: 20px;
+}
+
+.right-armpit .hair-strand:nth-child(10) {
+    transform: translateX(-5px) translateY(5px) rotate(145deg);
+    height: 21px;
+}
+.right-armpit .hair-strand:nth-child(10)::after {
+    transform: translateX(-50%) rotate(-175deg);
+    height: 22px;
+}
+
+/* 右边腋毛，朝下，适当散开 */
+.right-armpit .hair-strand:nth-child(11) {
+    transform: translateX(3px) translateY(-1px) rotate(135deg);
+    height: 20px;
+}
+.right-armpit .hair-strand:nth-child(11)::after {
+    transform: translateX(-50%) rotate(-165deg);
+    height: 19px;
+}
+
+.right-armpit .hair-strand:nth-child(12) {
+    transform: translateX(-1px) translateY(-4px) rotate(175deg);
+    height: 21px;
+}
+.right-armpit .hair-strand:nth-child(12)::after {
+    transform: translateX(-50%) rotate(-195deg);
+    height: 20px;
+}
+
+.right-armpit .hair-strand:nth-child(13) {
+    transform: translateX(5px) translateY(1px) rotate(145deg);
+    height: 19px;
+}
+.right-armpit .hair-strand:nth-child(13)::after {
+    transform: translateX(-50%) rotate(-175deg);
+    height: 18px;
+}
+
+.right-armpit .hair-strand:nth-child(14) {
+    transform: translateX(-3px) translateY(2px) rotate(185deg);
+    height: 22px;
+}
+.right-armpit .hair-strand:nth-child(14)::after {
+    transform: translateX(-50%) rotate(-155deg);
+    height: 21px;
+}
+
+.right-armpit .hair-strand:nth-child(15) {
+    transform: translateX(7px) translateY(-3px) rotate(155deg);
+    height: 20px;
+}
+.right-armpit .hair-strand:nth-child(15)::after {
+    transform: translateX(-50%) rotate(-185deg);
+    height: 19px;
+}
+
+.right-armpit .hair-strand:nth-child(16) {
+    transform: translateX(-5px) translateY(4px) rotate(125deg);
+    height: 21px;
+}
+.right-armpit .hair-strand:nth-child(16)::after {
+    transform: translateX(-50%) rotate(-205deg);
+    height: 20px;
+}
+
+.right-armpit .hair-strand:nth-child(17) {
+    transform: translateX(1px) translateY(-2px) rotate(165deg);
+    height: 19px;
+}
+.right-armpit .hair-strand:nth-child(17)::after {
+    transform: translateX(-50%) rotate(-195deg);
+    height: 18px;
+}
+
+.right-armpit .hair-strand:nth-child(18) {
+    transform: translateX(-7px) translateY(1px) rotate(135deg);
+    height: 20px;
+}
+.right-armpit .hair-strand:nth-child(18)::after {
+    transform: translateX(-50%) rotate(-165deg);
+    height: 19px;
+}
+
+.right-armpit .hair-strand:nth-child(19) {
+    transform: translateX(4px) translateY(3px) rotate(185deg);
+    height: 21px;
+}
+.right-armpit .hair-strand:nth-child(19)::after {
+    transform: translateX(-50%) rotate(-155deg);
+    height: 20px;
+}
+
+.right-armpit .hair-strand:nth-child(20) {
+    transform: translateX(-2px) translateY(-1px) rotate(145deg);
+    height: 19px;
+}
+.right-armpit .hair-strand:nth-child(20)::after {
+    transform: translateX(-50%) rotate(-175deg);
+    height: 18px;
+}
+
+.ground {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100px; /* Keep height for collision calculation */
+    z-index: 3; /* Above background-person-container and markers */
+    pointer-events: none; /* Prevent any potential interaction */
+}
+
+.character {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    transition: transform 0.1s ease;
+    z-index: 4; /* Above ground */
+}
+
+.character img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.win-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 30px 50px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-size: 2.5em;
+    text-align: center;
+    border-radius: 10px;
+    z-index: 100;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.loading-container {
+    width: 300px;
+    margin: 20px auto;
+}
+
+.loading-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.loading-progress {
+    width: 0%;
+    height: 100%;
+    background-color: #4CAF50;
+    transition: width 0.3s ease;
+}
+
+.loading-text {
+    text-align: center;
+    color: #333;
+    font-size: 16px;
+}
+
+.start-text {
+    font-size: 1.5em;
+    color: #7f8c8d;
+    animation: blink 1.5s infinite;
+    margin-top: 20px;
+}
+
+#physics-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.score-display {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #FFD700;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 100;
+} 
