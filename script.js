@@ -324,6 +324,13 @@ function preloadResources() {
     const startText = document.querySelector('.start-text');
     const loadingText = document.querySelector('.loading-text');
 
+    // 添加全局加载超时
+    const loadingTimeout = setTimeout(() => {
+        loadingText.textContent = '加载时间过长，请点击屏幕继续';
+        startText.classList.remove('hidden');
+        initializeAudioObjects();
+    }, 10000);  // 10秒超时
+
     // 更新进度
     function updateProgress() {
         loadedCount++;
@@ -332,23 +339,27 @@ function preloadResources() {
         percentageText.textContent = `${Math.round(progress)}%`;
 
         if (loadedCount === totalResources) {
+            clearTimeout(loadingTimeout);
             loadingText.textContent = '加载完成！';
             startText.classList.remove('hidden');
-            
-            // 预加载完成后初始化音频对象
-            sounds = {
-                background: loadedResources.sounds['background.mp3'],
-                fire: loadedResources.sounds['fire.mp3'],
-                jump: loadedResources.sounds['jump.mp3'],
-                win: loadedResources.sounds['win.mp3']
-            };
-            
-            // 设置音频音量
-            sounds.background.volume = 0.3;
-            sounds.fire.volume = 0.5;
-            sounds.jump.volume = 0.5;
-            sounds.win.volume = 0.5;
+            initializeAudioObjects();
         }
+    }
+    
+    function initializeAudioObjects() {
+        // 预加载完成后初始化音频对象
+        sounds = {
+            background: loadedResources.sounds['background.mp3'] || new Audio(),
+            fire: loadedResources.sounds['fire.mp3'] || new Audio(),
+            jump: loadedResources.sounds['jump.mp3'] || new Audio(),
+            win: loadedResources.sounds['win.mp3'] || new Audio()
+        };
+        
+        // 设置音频音量
+        sounds.background.volume = 0.3;
+        sounds.fire.volume = 0.5;
+        sounds.jump.volume = 0.5;
+        sounds.win.volume = 0.5;
     }
 
     // 预加载图片
@@ -358,19 +369,45 @@ function preloadResources() {
             loadedResources.images[src] = img;
             updateProgress();
         };
-        img.onerror = updateProgress;
+        img.onerror = () => {
+            // 图片加载错误，但仍然更新进度
+            updateProgress();
+        };
         img.src = src;
     });
 
-    // 预加载音频
+    // 预加载音频 - 针对iOS做特殊处理
     resources.sounds.forEach(src => {
         const audio = new Audio();
+        
+        // 为每个音频文件设置单独的超时
+        const audioTimeout = setTimeout(() => {
+            if (!loadedResources.sounds[src]) {
+                // 音频加载超时，使用空的Audio对象占位
+                loadedResources.sounds[src] = new Audio();
+                updateProgress();
+            }
+        }, 3000); // 3秒超时
+        
         audio.oncanplaythrough = () => {
+            clearTimeout(audioTimeout);
             loadedResources.sounds[src] = audio;
             updateProgress();
         };
-        audio.onerror = updateProgress;
+        
+        audio.onerror = () => {
+            clearTimeout(audioTimeout);
+            updateProgress();
+        };
+        
         audio.src = src;
+        
+        // 尝试加载，但iOS可能会阻止
+        try {
+            audio.load();
+        } catch (e) {
+            // 忽略错误
+        }
     });
 }
 
