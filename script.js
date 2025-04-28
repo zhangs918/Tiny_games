@@ -113,13 +113,25 @@ function checkMobileDevice() {
     }
     
     if (isMobile) {
+        // 设置游戏区域高度
+        const gameArea = document.querySelector('.game-area');
+        const mobileControls = document.querySelector('.mobile-controls');
+        if (gameArea && mobileControls) {
+            const controlsHeight = mobileControls.offsetHeight;
+            gameArea.style.height = `calc(100% - ${controlsHeight}px)`;
+        }
+        
         initMobileControls();
+        
         // 添加iOS特定的事件处理
         document.addEventListener('touchmove', function(e) {
             if (e.touches.length > 1) {
                 e.preventDefault();
             }
         }, { passive: false });
+        
+        // 防止iOS下拉刷新
+        document.body.style.overscrollBehavior = 'none';
     }
 }
 
@@ -129,11 +141,18 @@ function initMobileControls() {
     if (!controls) return;
     
     controls.style.display = 'block';
+    controls.style.pointerEvents = 'auto';
+    
     joystickElement = document.querySelector('.joystick');
     joystickContainer = document.querySelector('.joystick-container');
     jumpButton = document.querySelector('.jump-button');
     
     if (!joystickElement || !joystickContainer || !jumpButton) return;
+    
+    // 设置控制元素样式
+    joystickContainer.style.pointerEvents = 'auto';
+    joystickElement.style.pointerEvents = 'auto';
+    jumpButton.style.pointerEvents = 'auto';
     
     // 虚拟摇杆事件处理
     joystickContainer.addEventListener('touchstart', handleJoystickStart, { passive: false });
