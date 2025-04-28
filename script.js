@@ -101,40 +101,63 @@ let joystickElement;
 let joystickContainer;
 let jumpButton;
 
-// 检测是否为移动设备
+// 修改设备检测函数
 function checkMobileDevice() {
-    isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    // 更全面的移动设备检测
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet/i.test(userAgent.toLowerCase());
+    
+    // 强制在iOS设备上显示移动控制
+    if (/iphone|ipad|ipod/i.test(userAgent.toLowerCase())) {
+        isMobile = true;
+    }
+    
     if (isMobile) {
         initMobileControls();
+        // 添加iOS特定的事件处理
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
     }
 }
 
-// 初始化移动端控制
+// 修改初始化移动端控制函数
 function initMobileControls() {
+    const controls = document.querySelector('.mobile-controls');
+    if (!controls) return;
+    
+    controls.style.display = 'block';
     joystickElement = document.querySelector('.joystick');
     joystickContainer = document.querySelector('.joystick-container');
     jumpButton = document.querySelector('.jump-button');
-
+    
+    if (!joystickElement || !joystickContainer || !jumpButton) return;
+    
     // 虚拟摇杆事件处理
-    joystickContainer.addEventListener('touchstart', handleJoystickStart);
-    document.addEventListener('touchmove', handleJoystickMove);
+    joystickContainer.addEventListener('touchstart', handleJoystickStart, { passive: false });
+    document.addEventListener('touchmove', handleJoystickMove, { passive: false });
     document.addEventListener('touchend', handleJoystickEnd);
-
+    
     // 跳跃按钮事件处理
-    jumpButton.addEventListener('touchstart', () => {
+    jumpButton.addEventListener('touchstart', (e) => {
+        e.preventDefault();
         if (!gameOver) {
             controls.up = true;
             if (physics.isGrounded) {
                 sounds.jump.play();
             }
         }
-    });
-    jumpButton.addEventListener('touchend', () => {
+    }, { passive: false });
+    
+    jumpButton.addEventListener('touchend', (e) => {
+        e.preventDefault();
         controls.up = false;
-    });
+    }, { passive: false });
 }
 
-// 处理摇杆开始
+// 修改摇杆处理函数
 function handleJoystickStart(e) {
     e.preventDefault();
     joystickActive = true;
@@ -147,7 +170,6 @@ function handleJoystickStart(e) {
     updateJoystickPosition(touch.clientX, touch.clientY);
 }
 
-// 处理摇杆移动
 function handleJoystickMove(e) {
     if (!joystickActive) return;
     e.preventDefault();
