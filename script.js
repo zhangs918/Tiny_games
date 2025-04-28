@@ -101,79 +101,66 @@ let joystickElement;
 let joystickContainer;
 let jumpButton;
 
-// 修改设备检测函数
+// 修改设备检测函数 (简化)
 function checkMobileDevice() {
-    // 更全面的移动设备检测
+    // 主要依赖 CSS 媒体查询来显示/隐藏控件
+    // 这里可以保留 isMobile 变量用于 JS 逻辑判断
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
     isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet/i.test(userAgent.toLowerCase());
     
-    // 强制在iOS设备上显示移动控制
-    if (/iphone|ipad|ipod/i.test(userAgent.toLowerCase())) {
+    // 强制在iOS设备上设置 isMobile
+    if (!isMobile && /iphone|ipad|ipod/i.test(userAgent.toLowerCase())) {
         isMobile = true;
     }
-    
+
     if (isMobile) {
-        // 设置游戏区域高度
-        const gameArea = document.querySelector('.game-area');
-        const mobileControls = document.querySelector('.mobile-controls');
-        if (gameArea && mobileControls) {
-            const controlsHeight = mobileControls.offsetHeight;
-            gameArea.style.height = `calc(100% - ${controlsHeight}px)`;
-        }
-        
+        console.log("Mobile device detected. Initializing controls...");
         initMobileControls();
-        
-        // 添加iOS特定的事件处理
+        // 阻止默认的触摸滚动和缩放行为
         document.addEventListener('touchmove', function(e) {
-            if (e.touches.length > 1) {
-                e.preventDefault();
-            }
+            e.preventDefault();
         }, { passive: false });
-        
-        // 防止iOS下拉刷新
         document.body.style.overscrollBehavior = 'none';
+    } else {
+        console.log("Desktop device detected.");
     }
 }
 
 // 修改初始化移动端控制函数
 function initMobileControls() {
-    const controls = document.querySelector('.mobile-controls');
-    if (!controls) return;
-    
-    controls.style.display = 'block';
-    controls.style.pointerEvents = 'auto';
-    
     joystickElement = document.querySelector('.joystick');
     joystickContainer = document.querySelector('.joystick-container');
     jumpButton = document.querySelector('.jump-button');
-    
-    if (!joystickElement || !joystickContainer || !jumpButton) return;
-    
-    // 设置控制元素样式
-    joystickContainer.style.pointerEvents = 'auto';
-    joystickElement.style.pointerEvents = 'auto';
-    jumpButton.style.pointerEvents = 'auto';
-    
+
+    if (!joystickContainer || !jumpButton || !joystickElement) {
+        console.error("Failed to find mobile control elements!");
+        return;
+    }
+    console.log("Mobile control elements found:", { joystickContainer, jumpButton });
+
     // 虚拟摇杆事件处理
     joystickContainer.addEventListener('touchstart', handleJoystickStart, { passive: false });
     document.addEventListener('touchmove', handleJoystickMove, { passive: false });
     document.addEventListener('touchend', handleJoystickEnd);
-    
+    document.addEventListener('touchcancel', handleJoystickEnd); // 添加 touchcancel 处理
+
     // 跳跃按钮事件处理
     jumpButton.addEventListener('touchstart', (e) => {
         e.preventDefault();
-        if (!gameOver) {
+        if (!gameOver && !isAttracting && fireTimer === null) { // 确保不在其他动画状态
             controls.up = true;
-            if (physics.isGrounded) {
-                sounds.jump.play();
+            if (physics.isGrounded && sounds.jump) {
+                sounds.jump.play().catch(err => console.error("Jump sound error:", err));
             }
         }
     }, { passive: false });
-    
+
     jumpButton.addEventListener('touchend', (e) => {
         e.preventDefault();
         controls.up = false;
     }, { passive: false });
+
+    console.log("Mobile controls initialized.");
 }
 
 // 修改摇杆处理函数
@@ -1201,42 +1188,71 @@ function handleClickStart() {
 // 修改startGame函数，使用预加载的音频
 function startGame() {
     if (gameStarted || gameOver) {
-        return; 
-    }
-
-    if (!startScreen || !gameArea) {
-        console.error('Start screen or game area element not found!'); 
         return;
     }
 
-    // 开始播放背景音乐
-    sounds.background.loop = true;
-    sounds.background.play();
+    if (!startScreen || !gameArea) {
+        console.error('Start screen or game area element not found!');
+        return;
+    }
 
-    startScreen.style.display = 'none';
-    gameArea.classList.remove('hidden'); 
+    console.log("Starting game...");
+
+    // 尝试播放背景音乐 (用户交互后才能在iOS上播放)
+    if (sounds.background) {
+        sounds.background.loop = true;
+        sounds.background.play().then(() => {
+            console.log("Background music playing.");
+        }).catch(error => {
+            console.warn("Background music failed to play initially:", error);
+            // 可能需要用户再次交互才能播放
+        });
+    }
+
+    startScreen.classList.add('hidden');
+    gameArea.classList.remove('hidden');
+    console.log("Game area displayed, start screen hidden.");
     
+    // 如果是移动端，确保控制层可见 (虽然CSS应该处理了)
+    if (isMobile) {
+        const mobileControls = document.querySelector('.mobile-controls');
+        if (mobileControls) mobileControls.style.display = 'block';
+        console.log("Ensuring mobile controls are displayed via JS.");
+    }
+
     gameStarted = true;
     gameOver = false;
+    isSecondGame = false; // 确保从第一关开始
+    isThirdGame = false;
+    score = 0;
     erasedMarkersCount = 0;
+
+    // 重置第一关的标记点
     markers.forEach(marker => {
         marker.style.display = 'block';
         marker.removeAttribute('data-erased');
     });
-    if (winMessage) {
-         winMessage.classList.add('hidden');
-    }
+    
+    // 隐藏可能存在的胜利信息和分数
+    if (winMessage) winMessage.classList.add('hidden');
+    const scoreDisplay = document.querySelector('.score-display');
+    if (scoreDisplay) scoreDisplay.classList.add('hidden');
 
+    // 初始化角色和物理状态
     initCharacter();
-    physics.velocity.x = 0; physics.velocity.y = 0;
-    physics.acceleration.x = 0; physics.acceleration.y = 0;
+    physics.position = { x: window.innerWidth / 2, y: window.innerHeight - 150 };
+    physics.velocity = { x: 0, y: 0 };
+    physics.acceleration = { x: 0, y: 0 };
     physics.isGrounded = false;
+    controls.left = false; controls.right = false; controls.up = false; controls.down = false;
 
+    // 移除启动监听器，添加游戏监听器
     document.removeEventListener('keydown', handleKeyDown); 
-    document.removeEventListener('click', handleClickStart); 
-
+    document.removeEventListener('click', handleClickStart);
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
+
+    console.log("Game started successfully.");
 }
 
 // 游戏循环
@@ -1333,8 +1349,9 @@ gameLoop();
 
 // 在页面加载完成后开始预加载
 window.addEventListener('load', () => {
-    checkMobileDevice();
-    preloadResources();
+    console.log("Window loaded.");
+    checkMobileDevice(); // 检测设备并初始化移动控件（如果需要）
+    preloadResources(); // 开始预加载
 }); 
 
 // 第三关胜利
