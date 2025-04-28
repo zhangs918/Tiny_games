@@ -92,6 +92,101 @@ let sounds = {
     win: null
 };
 
+// 添加移动端控制变量
+let isMobile = false;
+let joystickActive = false;
+let joystickPosition = { x: 0, y: 0 };
+let joystickStartPosition = { x: 0, y: 0 };
+let joystickElement;
+let joystickContainer;
+let jumpButton;
+
+// 检测是否为移动设备
+function checkMobileDevice() {
+    isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+        initMobileControls();
+    }
+}
+
+// 初始化移动端控制
+function initMobileControls() {
+    joystickElement = document.querySelector('.joystick');
+    joystickContainer = document.querySelector('.joystick-container');
+    jumpButton = document.querySelector('.jump-button');
+
+    // 虚拟摇杆事件处理
+    joystickContainer.addEventListener('touchstart', handleJoystickStart);
+    document.addEventListener('touchmove', handleJoystickMove);
+    document.addEventListener('touchend', handleJoystickEnd);
+
+    // 跳跃按钮事件处理
+    jumpButton.addEventListener('touchstart', () => {
+        if (!gameOver) {
+            controls.up = true;
+            if (physics.isGrounded) {
+                sounds.jump.play();
+            }
+        }
+    });
+    jumpButton.addEventListener('touchend', () => {
+        controls.up = false;
+    });
+}
+
+// 处理摇杆开始
+function handleJoystickStart(e) {
+    e.preventDefault();
+    joystickActive = true;
+    const touch = e.touches[0];
+    const rect = joystickContainer.getBoundingClientRect();
+    joystickStartPosition = {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+    };
+    updateJoystickPosition(touch.clientX, touch.clientY);
+}
+
+// 处理摇杆移动
+function handleJoystickMove(e) {
+    if (!joystickActive) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    updateJoystickPosition(touch.clientX, touch.clientY);
+}
+
+// 处理摇杆结束
+function handleJoystickEnd() {
+    joystickActive = false;
+    joystickElement.style.transform = 'translate(-50%, -50%)';
+    controls.left = false;
+    controls.right = false;
+}
+
+// 更新摇杆位置
+function updateJoystickPosition(x, y) {
+    const dx = x - joystickStartPosition.x;
+    const dy = y - joystickStartPosition.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const maxDistance = 50;
+
+    if (distance > maxDistance) {
+        const angle = Math.atan2(dy, dx);
+        joystickPosition = {
+            x: Math.cos(angle) * maxDistance,
+            y: Math.sin(angle) * maxDistance
+        };
+    } else {
+        joystickPosition = { x: dx, y: dy };
+    }
+
+    joystickElement.style.transform = `translate(${joystickPosition.x}px, ${joystickPosition.y}px)`;
+
+    // 更新控制状态
+    controls.left = joystickPosition.x < -20;
+    controls.right = joystickPosition.x > 20;
+}
+
 // 初始化 Matter.js 引擎
 function initMatter() {
     // 创建引擎
@@ -712,6 +807,15 @@ function updatePhysics() {
 
     // 更新角色显示的 GIF
     updateCharacterSprite();
+
+    // 添加移动端控制支持
+    if (isMobile && joystickActive) {
+        if (controls.left) {
+            physics.acceleration.x = -physics.horizontalAcceleration;
+        } else if (controls.right) {
+            physics.acceleration.x = physics.horizontalAcceleration;
+        }
+    }
 }
 
 // 检查碰撞函数
@@ -1188,6 +1292,7 @@ gameLoop();
 
 // 在页面加载完成后开始预加载
 window.addEventListener('load', () => {
+    checkMobileDevice();
     preloadResources();
 }); 
 
